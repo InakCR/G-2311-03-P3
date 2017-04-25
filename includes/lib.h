@@ -1,13 +1,13 @@
 /**
  * @brief Libreria de funciones para la creacion
- * y uso de un servidor basado en IRC
+ * y uso de un servidor basado en IRC. Implementacion de funciones OpenSSL
  *
  * @file lib.h
  * @author Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
  * Enrique Aracil <enrique.aracil@estudiante.uam.es>
  * Grupo 2311
- * @version 1.0
- * @date 13-02-2017
+ * @version 3.0
+ * @date 23-03-2017
  */
 
 #include <stdio.h>
@@ -33,6 +33,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include "openssl/ssl.h"
+#include "openssl/err.h"
 
 /**
    @brief tamaño maximo que puede tener un buffer.
@@ -92,3 +94,89 @@ int accept_conex(int sock);
    @return HostNameIp: encaso de acierto la estructura rellena sino, NULL.
  */
 void hostIp(int sock, char ** host,char** ip);
+/*****************************************************************************
+ FUNCIONES SSL
+ *****************************************************************************/
+
+/**
+   @brief inicializar_nivel_SSL.
+
+   Descripcion:  Esta función se encargará de realizar todas las llamadas
+    necesarias para que la aplicación pueda usar la capa segura SSL.
+   @param
+   @return
+ */
+void inicializar_nivel_SSL ();
+/**
+   @brief fijar_contexto_SSL.
+
+   Descripcion: Esta función se encargará de inicializar correctamente
+   el contexto que será utilizado para la creación de canales seguros
+   mediante SSL. Deberá recibir información sobre las rutas a los certificados y
+   claves con los que vaya a trabajar la aplicación.
+   @param contex :
+   @param cert:
+   @param certRoot:
+   @return
+ */
+void fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot);
+/**
+   @brief conectar_canal_seguro_SSL.
+
+   Descripcion: Dado un contexto SSL y un descriptor de socket esta función
+   se encargará de obtener un canal seguro SSL iniciando el proceso de
+   handshake con el otro extremo.
+   @param
+   @return
+ */
+void conectar_canal_seguro_SSL();
+/**
+   @brief aceptar_canal_seguro_SSL.
+
+   Descripcion: Dado un contexto SSL y un descriptor de socket esta función
+   se encargará de bloquear la aplicación, que se quedará esperando hasta
+   recibir un handshake por parte del cliente.
+   @param
+   @return
+ */
+void aceptar_canal_seguro_SSL();
+/**
+   @brief evaluar_post_connectar_SSL.
+
+   Descripcion: Esta función comprobará una vez realizado el handshake que el
+   canal de comunicación se puede considerar seguro.
+   @param
+   @return
+ */
+void evaluar_post_connectar_SSL();
+/**
+   @brief enviar_datos_SSL.
+
+   Descripcion:  Esta función será el equivalente a la función de envío de
+   mensajes que se realizó en la práctica 1, pero será utilizada para enviar
+   datos a través del canal seguro. Es importante que sea genérica y
+   pueda ser utilizada independientemente de los datos que se vayan a enviar.
+   @param
+   @return
+ */
+void enviar_datos_SSL();
+/**
+   @brief recibir_datos_SSL.
+
+   Descripcion: Esta función será el equivalente a la función de lectura de
+   mensajes que se realizó en la práctica 1, pero será utilizada para enviar
+   datos a través del canal seguro. Es importante que sea genérica y
+   pueda ser utilizada independientemente de los datos que se vayan a recibir.
+   @param
+   @return
+ */
+void recibir_datos_SSL();
+/**
+   @brief cerrar_canal_SSL.
+
+   Descripcion: Esta función liberará todos los recursos y cerrará el canal
+   de comunicación seguro creado previamente.
+   @param
+   @return
+ */
+void cerrar_canal_SSL();

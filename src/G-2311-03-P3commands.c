@@ -1,4 +1,4 @@
-#include "../includes/G-2311-03-P1commands.h"
+#include "../includes/G-2311-03-P3commands.h"
 
 char motdServer[50] = "**BIENVENIDO AL SERVIDOR**";
 char prefixC[10] = "REDES2";

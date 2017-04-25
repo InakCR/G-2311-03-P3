@@ -1,6 +1,6 @@
 
 #include "../includes/lib.h"
-
+char CApath[10] = "/cert/";
 void on_error(int logPri, char *err) {
   syslog(logPri, "%s", err);
   exit(EXIT_FAILURE);
@@ -122,4 +122,20 @@ void hostIp(int sock, char **host, char **ip) {
   }
   *host = he->h_name;
   return;
+}
+
+void inicializar_nivel_SSL() {
+  SSL_load_error_strings();
+  SSL_library_init();
+}
+
+void fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot) {
+  *contex = SSL_CTX_new(SSLv23_method());
+
+  SSL_CTX_load_verify_locations(*contex, certRoot, CApath);
+  SSL_CTX_set_default_verify_paths(*contex);
+  SSL_CTX_use_certificate_chain_file(*contex, cert);
+  SSL_CTX_use_PrivateKey_file(*contex, cert, SSL_FILETYPE_PEM);
+
+  SSL_CTX_set_verify(*contex, SSL_VERIFY_PEER, NULL);
 }
