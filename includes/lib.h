@@ -103,8 +103,6 @@ void hostIp(int sock, char ** host,char** ip);
 
    Descripcion:  Esta función se encargará de realizar todas las llamadas
     necesarias para que la aplicación pueda usar la capa segura SSL.
-   @param
-   @return
  */
 void inicializar_nivel_SSL ();
 /**
@@ -114,31 +112,46 @@ void inicializar_nivel_SSL ();
    el contexto que será utilizado para la creación de canales seguros
    mediante SSL. Deberá recibir información sobre las rutas a los certificados y
    claves con los que vaya a trabajar la aplicación.
-   @param contex :
-   @param cert:
-   @param certRoot:
-   @return
+   @param contex : contexto SSL que se inicializa
+   @param cert: certificado del cliente/servidor
+   @param certRoot: certificado externo
+   @return -1 en caso de error
  */
 int fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot);
+/**
+   @brief canal_seguro.
+
+   Descripcion: Dado un contexto SSL y un descriptor de socket esta función
+   se encargará de bloquear la aplicación.
+   @param contex : contexto SSL
+   @param ssl : canal seguro ssl
+   @param socket : descriptor de socket
+   @return -1 en caso de error
+ */
+int canal_seguro(SSL_CTX *contex, SSL **ssl, int socket);
 /**
    @brief conectar_canal_seguro_SSL.
 
    Descripcion: Dado un contexto SSL y un descriptor de socket esta función
    se encargará de obtener un canal seguro SSL iniciando el proceso de
    handshake con el otro extremo.
-   @param
-   @return
+   @param contex : contexto SSL
+   @param ssl : canal seguro ssl
+   @param socket : descriptor de socket
+   @return -1 en caso de error
  */
 int conectar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket);
-int canal_seguro(SSL_CTX *contex, SSL **ssl, int socket);
+
 /**
    @brief aceptar_canal_seguro_SSL.
 
    Descripcion: Dado un contexto SSL y un descriptor de socket esta función
    se encargará de bloquear la aplicación, que se quedará esperando hasta
    recibir un handshake por parte del cliente.
-   @param
-   @return
+   @param contex : contexto SSL
+   @param ssl : canal seguro ssl
+   @param socket : descriptor de socket
+   @return -1 en caso de error
  */
 int aceptar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket);
 /**
@@ -146,8 +159,8 @@ int aceptar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket);
 
    Descripcion: Esta función comprobará una vez realizado el handshake que el
    canal de comunicación se puede considerar seguro.
-   @param
-   @return
+   @param ssl : canal seguro ssl
+   @return -1 en caso de error
  */
 int evaluar_post_connectar_SSL(SSL *ssl);
 /**
@@ -157,8 +170,10 @@ int evaluar_post_connectar_SSL(SSL *ssl);
    mensajes que se realizó en la práctica 1, pero será utilizada para enviar
    datos a través del canal seguro. Es importante que sea genérica y
    pueda ser utilizada independientemente de los datos que se vayan a enviar.
-   @param
-   @return
+   @param ssl : canal seguro ssl
+   @param buf : mensaje a enviar
+   @param num : tamaño en bytes del mensaje
+   @return numero de bytes leidos, negativo en caso de fallo
  */
 int enviar_datos_SSL(SSL *ssl, const void *buf, int num);
 /**
@@ -168,8 +183,10 @@ int enviar_datos_SSL(SSL *ssl, const void *buf, int num);
    mensajes que se realizó en la práctica 1, pero será utilizada para enviar
    datos a través del canal seguro. Es importante que sea genérica y
    pueda ser utilizada independientemente de los datos que se vayan a recibir.
-   @param
-   @return
+   @param ssl : canal seguro ssl
+   @param buf : mensaje a recibir
+   @param num : tamaño en bytes del mensaje
+   @return numero de bytes leidos, negativo en caso de fallo
  */
 int recibir_datos_SSL(SSL *ssl, void *buf, int num);
 /**
@@ -177,7 +194,5 @@ int recibir_datos_SSL(SSL *ssl, void *buf, int num);
 
    Descripcion: Esta función liberará todos los recursos y cerrará el canal
    de comunicación seguro creado previamente.
-   @param
-   @return
  */
 void cerrar_canal_SSL(SSL_CTX *contex, SSL *ssl, int socke);

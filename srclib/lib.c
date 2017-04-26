@@ -158,13 +158,13 @@ int fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot) {
 
 int conectar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket) {
   if (canal_seguro(contex, ssl, socket) == 0) {
-    return 0;
+    return -1;
   }
   return SSL_connect(*ssl);
 }
 int aceptar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket) {
   if (canal_seguro(contex, ssl, socket) == 0) {
-    return 0;
+    return -1;
   }
   return SSL_accept(*ssl);
 }
@@ -174,10 +174,10 @@ int canal_seguro(SSL_CTX *contex, SSL **ssl, int socket) {
 }
 int evaluar_post_connectar_SSL(SSL *ssl) {
   if (SSL_get_peer_certificate(ssl) == NULL) {
-    return 0;
+    return -1;
   }
   if (SSL_get_verify_result(ssl) != X509_V_OK) {
-    return 0;
+    return -1;
   }
   return 1;
 }
