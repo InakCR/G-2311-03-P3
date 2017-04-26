@@ -1,69 +1,83 @@
 #include "../includes/lib.h"
-#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
-#define on_error(...)                                                          \
-  {                                                                            \
-    fprintf(stderr, __VA_ARGS__);                                              \
-    fflush(stderr);                                                            \
-    exit(1);                                                                   \
-  }
+char cert[200] = "./certs/servidor.pem";
+char certRoot[200] = "./certs/ca.pem";
 
 int main(int argc, char *argv[]) {
-  if (argc < 2)
-    on_error("Usage: %s [port]\n", argv[0]);
-
-  int port = atoi(argv[1]);
-
-  int server_fd, client_fd, err;
+  int socket_desc, client_sock, c, read_size;
   struct sockaddr_in server, client;
-  char buf[BUFFER_SIZE];
+  char client_message[BUFFER_SIZE];
+  SSL_CTX *contex;
+  SSL *ssl;
+  // SSL
+  inicializar_nivel_SSL();
+  if (fijar_contexto_SSL(&contex, cert, certRoot) == -1) {
+    puts("Error SSL");
+    return -1;
+  }
+  // Create socket
+  socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_desc == -1) {
+    printf("Could not create socket");
+  }
+  puts("Socket created");
 
-  server_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (server_fd < 0)
-    on_error("Could not create socket\n");
-
+  // Prepare the sockaddr_in structure
   server.sin_family = AF_INET;
-  server.sin_port = htons(port);
-  server.sin_addr.s_addr = htonl(INADDR_ANY);
+  server.sin_addr.s_addr = INADDR_ANY;
+  server.sin_port = htons(3333);
 
-  int opt_val = 1;
-  setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
+  // Bind
+  if (bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0) {
+    // print the error message
+    perror("bind failed. Error");
+    return 1;
+  }
+  puts("bind done");
 
-  err = bind(server_fd, (struct sockaddr *)&server, sizeof(server));
-  if (err < 0)
-    on_error("Could not bind socket\n");
+  // Listen
+  listen(socket_desc, 3);
 
-  err = listen(server_fd, 128);
-  if (err < 0)
-    on_error("Could not listen on socket\n");
+  // Accept and incoming connection
+  puts("Waiting for incoming connections...");
+  c = sizeof(struct sockaddr_in);
 
-  printf("Server is listening on %d\n", port);
-
-  while (1) {
-    socklen_t client_len = sizeof(client);
-    client_fd = accept(server_fd, (struct sockaddr *)&client, &client_len);
-
-    if (client_fd < 0)
-      on_error("Could not establish new connection\n");
-
-    while (1) {
-      int read = recv(client_fd, buf, BUFFER_SIZE, 0);
-
-      if (!read)
-        break; // done reading
-      if (read < 0)
-        on_error("Client read failed\n");
-
-      err = send(client_fd, buf, read, 0);
-      if (err < 0)
-        on_error("Client write failed\n");
-    }
+  // accept connection from an incoming client
+  client_sock =
+      accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c);
+  if (client_sock < 0) {
+    perror("accept failed");
+    return 1;
+  }
+  if (aceptar_canal_seguro_SSL(contex, &ssl, client_sock) == 0) {
+    puts("Error Aceptar SSL");
+    return -1;
   }
 
+  if (evaluar_post_connectar_SSL(ssl) == 0) {
+    perror("Evaluacion SSL Incorrecta");
+    return 1;
+  }
+  puts("Connection accepted");
+
+  while ((read_size = recibir_datos_SSL(ssl, client_message, BUFFER_SIZE)) >
+         0) {
+    enviar_datos_SSL(ssl, client_message, strlen(client_message));
+    bzero(client_message, strlen(client_message));
+  }
+
+  if (read_size == 0) {
+    puts("Client disconnected");
+    fflush(stdout);
+  } else if (read_size == -1) {
+    perror("recv failed");
+  }
+
+  cerrar_canal_SSL(contex, ssl, client_sock);
   return 0;
 }

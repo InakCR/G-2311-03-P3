@@ -129,13 +129,69 @@ void inicializar_nivel_SSL() {
   SSL_library_init();
 }
 
-void fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot) {
+int fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot) {
   *contex = SSL_CTX_new(SSLv23_method());
-
-  SSL_CTX_load_verify_locations(*contex, certRoot, CApath);
+  if (*contex == NULL) {
+    return -1;
+  }
+  if (SSL_CTX_load_verify_locations(*contex, certRoot, CApath) == 0) {
+    printf("Errir Load Verify\n");
+    return -1;
+  }
   SSL_CTX_set_default_verify_paths(*contex);
-  SSL_CTX_use_certificate_chain_file(*contex, cert);
-  SSL_CTX_use_PrivateKey_file(*contex, cert, SSL_FILETYPE_PEM);
+  if (SSL_CTX_use_certificate_chain_file(*contex, cert) != 1) {
+    printf("Errir use certificate\n");
+    return -1;
+  }
+  if (SSL_CTX_use_PrivateKey_file(*contex, cert, SSL_FILETYPE_PEM) != 1) {
+    printf("Errir use PrivateKey\n");
+    return -1;
+  }
 
   SSL_CTX_set_verify(*contex, SSL_VERIFY_PEER, NULL);
+  if (SSL_CTX_load_verify_locations(*contex, certRoot, CApath) == 0) {
+    printf("Errir Load Verify\n");
+    return -1;
+  }
+  return 1;
+}
+
+int conectar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket) {
+  if (canal_seguro(contex, ssl, socket) == 0) {
+    return 0;
+  }
+  return SSL_connect(*ssl);
+}
+int aceptar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket) {
+  if (canal_seguro(contex, ssl, socket) == 0) {
+    return 0;
+  }
+  return SSL_accept(*ssl);
+}
+int canal_seguro(SSL_CTX *contex, SSL **ssl, int socket) {
+  *ssl = SSL_new(contex);
+  return SSL_set_fd(*ssl, socket);
+}
+int evaluar_post_connectar_SSL(SSL *ssl) {
+  if (SSL_get_peer_certificate(ssl) == NULL) {
+    return 0;
+  }
+  if (SSL_get_verify_result(ssl) != X509_V_OK) {
+    return 0;
+  }
+  return 1;
+}
+int enviar_datos_SSL(SSL *ssl, const void *buf, int num) {
+  return SSL_write(ssl, buf, num);
+}
+int recibir_datos_SSL(SSL *ssl, void *buf, int num) {
+  return SSL_read(ssl, buf, num);
+}
+void cerrar_canal_SSL(SSL_CTX *contex, SSL *ssl, int socket) {
+  if (SSL_shutdown(ssl) != 1) {
+    return;
+  }
+  SSL_free(ssl);
+  SSL_CTX_free(contex);
+  close(socket);
 }

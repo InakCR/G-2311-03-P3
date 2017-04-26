@@ -119,7 +119,7 @@ void inicializar_nivel_SSL ();
    @param certRoot:
    @return
  */
-void fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot);
+int fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot);
 /**
    @brief conectar_canal_seguro_SSL.
 
@@ -129,7 +129,8 @@ void fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot);
    @param
    @return
  */
-void conectar_canal_seguro_SSL();
+int conectar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket);
+int canal_seguro(SSL_CTX *contex, SSL **ssl, int socket);
 /**
    @brief aceptar_canal_seguro_SSL.
 
@@ -139,7 +140,7 @@ void conectar_canal_seguro_SSL();
    @param
    @return
  */
-void aceptar_canal_seguro_SSL();
+int aceptar_canal_seguro_SSL(SSL_CTX *contex, SSL **ssl, int socket);
 /**
    @brief evaluar_post_connectar_SSL.
 
@@ -148,7 +149,7 @@ void aceptar_canal_seguro_SSL();
    @param
    @return
  */
-void evaluar_post_connectar_SSL();
+int evaluar_post_connectar_SSL(SSL *ssl);
 /**
    @brief enviar_datos_SSL.
 
@@ -159,7 +160,7 @@ void evaluar_post_connectar_SSL();
    @param
    @return
  */
-void enviar_datos_SSL();
+int enviar_datos_SSL(SSL *ssl, const void *buf, int num);
 /**
    @brief recibir_datos_SSL.
 
@@ -170,7 +171,7 @@ void enviar_datos_SSL();
    @param
    @return
  */
-void recibir_datos_SSL();
+int recibir_datos_SSL(SSL *ssl, void *buf, int num);
 /**
    @brief cerrar_canal_SSL.
 
@@ -179,4 +180,4 @@ void recibir_datos_SSL();
    @param
    @return
  */
-void cerrar_canal_SSL();
+void cerrar_canal_SSL(SSL_CTX *contex, SSL *ssl, int socke);
