@@ -3,15 +3,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+
 char cert[200] = "./certs/cliente.pem";
 char certRoot[200] = "./certs/ca.pem";
 
 int main(int argc, char *argv[]) {
-  int sock;
-  struct sockaddr_in server;
   char message[BUFFER_SIZE], server_reply[BUFFER_SIZE];
+  struct sockaddr_in server;
   SSL_CTX *contex;
   SSL *ssl;
+  int sock;
+
+  if (argc > 2) {
+    strcpy(cert, argv[1]);
+    strcpy(certRoot, argv[2]);
+  }
   // SSL
   inicializar_nivel_SSL();
   if (fijar_contexto_SSL(&contex, cert, certRoot) == -1) {

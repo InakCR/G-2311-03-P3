@@ -14,6 +14,12 @@ int main(int argc, char *argv[]) {
   char client_message[BUFFER_SIZE];
   SSL_CTX *contex;
   SSL *ssl;
+
+  if (argc > 2) {
+    strcpy(cert, argv[1]);
+    strcpy(certRoot, argv[2]);
+  }
+
   // SSL
   inicializar_nivel_SSL();
   if (fijar_contexto_SSL(&contex, cert, certRoot) == -1) {

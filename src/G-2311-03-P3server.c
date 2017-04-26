@@ -10,6 +10,8 @@ int main(int argc, char *argv[]) {
   pthread_attr_t attr;
   fd_set readfds;
 
+  if (argc > 1) {
+  }
   // Crecion de proceso Daemon
   if (daemonizar("REDES2") < 0)
     on_error(LOG_ERR, "Error daemonizar");
