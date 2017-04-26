@@ -85,11 +85,11 @@ certificados:
 	@openssl req -new -x509 -key $(CA)rootkey.pem -subj "/C=ES/ST=MADRID/L=ALCOBENDAS/O=EPS/CN=Redes2 CA/OU=ICR" -out $(CA)rootcert.pem
 	@cat $(CA)rootcert.pem $(CA)rootkey.pem > $(CA)ca.pem
 	@openssl genrsa -out $(CA)clientkey.pem 2048
-	@openssl req -new -key $(CA)clientkey.pem -subj "/C=ES/ST=MADRID/L=ALCOBENDAS/O=EPS/CN=$(GROUP)-client/OU=ICR" -out $(CA)clientx.pem
+	@openssl req -new -key $(CA)clientkey.pem -subj "/C=ES/ST=MADRID/L=ALCOBENDAS/O=EPS/CN=$(GROUP1)-client/OU=ICR" -out $(CA)clientx.pem
 	@openssl x509 -req -in $(CA)/clientx.pem -out $(CA)/clientcert.pem -CA $(CA)/rootcert.pem -CAkey $(CA)/rootkey.pem -CAcreateserial
 	@cat $(CA)clientcert.pem $(CA)clientkey.pem > $(CA)cliente.pem
 	@openssl genrsa -out $(CA)serverkey.pem 2048
-	@openssl req -new -key $(CA)serverkey.pem -subj "/C=ES/ST=MADRID/L=ALCOBENDAS/O=EPS/CN=$(GROUP)-server/OU=ICR" -out $(CA)serverx.pem
+	@openssl req -new -key $(CA)serverkey.pem -subj "/C=ES/ST=MADRID/L=ALCOBENDAS/O=EPS/CN=$(GROUP1)-server/OU=ICR" -out $(CA)serverx.pem
 	@openssl x509 -req -in $(CA)serverx.pem -out $(CA)servercert.pem -CA $(CA)rootcert.pem -CAkey $(CA)rootkey.pem -CAcreateserial
 	@cat $(CA)servercert.pem $(CA)serverkey.pem > $(CA)servidor.pem
 
