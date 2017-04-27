@@ -135,22 +135,22 @@ int fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot) {
     return -1;
   }
   if (SSL_CTX_load_verify_locations(*contex, certRoot, CApath) == 0) {
-    printf("Errir Load Verify\n");
+    printf("Error Load Verify\n");
     return -1;
   }
   SSL_CTX_set_default_verify_paths(*contex);
-  if (SSL_CTX_use_certificate_chain_file(*contex, cert) != 1) {
-    printf("Errir use certificate\n");
+  if (SSL_CTX_use_certificate_file(*contex, cert, SSL_FILETYPE_PEM) != 1) {
+    printf("Error use certificate\n");
     return -1;
   }
   if (SSL_CTX_use_PrivateKey_file(*contex, cert, SSL_FILETYPE_PEM) != 1) {
-    printf("Errir use PrivateKey\n");
+    printf("Error use PrivateKey\n");
     return -1;
   }
 
   SSL_CTX_set_verify(*contex, SSL_VERIFY_PEER, NULL);
   if (SSL_CTX_load_verify_locations(*contex, certRoot, CApath) == 0) {
-    printf("Errir Load Verify\n");
+    printf("Error Load Verify\n");
     return -1;
   }
   return 1;

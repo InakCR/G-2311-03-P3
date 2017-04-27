@@ -9,6 +9,8 @@
  * @date 13-02-2017
  */
 #include "../includes/G-2311-03-P3commands.h"
+#include <getopt.h>
+#include <inttypes.h>
 /**
    @brief tiempo maximo de alarma en segundos
  */
@@ -40,6 +42,9 @@ Descripcion: Recibe un comman do por parte del cliente y lo realiza ne el servid
 @return int: socket de conexion al cliente si todo fue correcto, EXIT_FAILURE en caso de error.
 */
 int recibir(int sock, char** userNick);
+void seguridadSSL();
+void aceptarConexionSSL(int client_sock);
+int recibirDatos(int sock, char *command);
 /**
 @brief getNumeroClientes.
 

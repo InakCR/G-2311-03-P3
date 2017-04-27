@@ -119,4 +119,10 @@ char *isAway(char *nick) {
   syslog(LOG_INFO, "Away es %s", away);
   return away;
 }
+
+int enviarDatos(SSL *ssl, int sock, char *command) {
+  if (ssl)
+    return recibir_datos_SSL(ssl, command, BUFFER_SIZE);
+  return send(sock, command, BUFFER_SIZE, 0);
+}
 // LIBERAR ESTRUCTURAS

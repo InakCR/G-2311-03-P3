@@ -1,7 +1,18 @@
 #include "../includes/G-2311-03-P3server.h"
 
+int segL = 0;
+int port = 0;
 long ncliente = 0;
 
+char cert[200] = "./certs/servidor.pem";
+char certRoot[200] = "./certs/ca.pem";
+
+static struct option long_options[] = {{"help", no_argument, NULL, 'h'},
+                                       {"ssl", no_argument, NULL, 's'},
+                                       {"port", required_argument, NULL, 'p'},
+                                       {NULL, 0, NULL, 0}};
+SSL *ssl = NULL;
+SSL_CTX *contex = NULL;
 int main(int argc, char *argv[]) {
 
   int socketServer, socketClient, err, max;
@@ -9,14 +20,36 @@ int main(int argc, char *argv[]) {
   struct timeval timeout;
   pthread_attr_t attr;
   fd_set readfds;
+  char ch;
 
-  if (argc > 1) {
+  while ((ch = getopt_long(argc, argv, "h:s:", long_options, NULL)) != -1) {
+    switch (ch) {
+    case 'h':
+      printf("Los argumentos reconocidos son:\n --ssl para activar la "
+             "seguridad SSL\n --help para informacion\n");
+      break;
+    case 's':
+      segL = 1;
+      printf("Seguridad SSL activada \n");
+      seguridadSSL();
+      break;
+    case 'p':
+      port = atoi(optarg);
+      printf("Escuchando puerto %d\n", port);
+      break;
+    case '?':
+      printf(
+          "Argumento no reconocido, pruebe con --help paraa mas informacion\n");
+      break;
+    }
   }
+
   // Crecion de proceso Daemon
   if (daemonizar("REDES2") < 0)
     on_error(LOG_ERR, "Error daemonizar");
-
-  socketServer = ini_server(PORT);
+  if (port == 0)
+    port = PORT;
+  socketServer = ini_server(port);
 
   // Apertura del socket
   if (socketServer < 0)
@@ -44,7 +77,8 @@ int main(int argc, char *argv[]) {
     // Accept
     socketClient = accept_conex(socketServer);
     // Tiempo de espera a una peticion
-
+    if (segL)
+      aceptarConexionSSL(socketClient);
     // hilo conexion cliente, atendemos al cliente en el hilo
     pthread_attr_init(&attr);
     err = pthread_create(&ptCliente[ncliente], &attr, deal_cliente,
@@ -81,8 +115,11 @@ int recibir(int sock, char **userNick) {
   int n_command = 1;
 
   /*Recibimos el comando*/
-  if (recv(sock, command, BUFFER_SIZE, 0) == -1) {
-    close(sock);
+  if (recibirDatos(sock, command) < 1) {
+    if (segL)
+      cerrar_canal_SSL(contex, ssl, sock);
+    else
+      close(sock);
     return -1;
   }
 
@@ -125,5 +162,27 @@ int recibir(int sock, char **userNick) {
   //  free(pipe);
 
   return 1;
+}
+void seguridadSSL() {
+  char cert[200] = "./certs/servidor.pem";
+  char certRoot[200] = "./certs/ca.pem";
+
+  inicializar_nivel_SSL();
+  if (fijar_contexto_SSL(&contex, cert, certRoot) == -1) {
+    puts("Error SSL");
+    exit(1);
+  }
+}
+void aceptarConexionSSL(int client_sock) {
+  if (aceptar_canal_seguro_SSL(contex, &ssl, client_sock) == 0)
+    on_error(LOG_ERR, "Error Aceptar SSL");
+
+  if (evaluar_post_connectar_SSL(ssl) == 0)
+    on_error(LOG_ERR, "Evaluacion SSL Incorrecta");
+}
+int recibirDatos(int sock, char *command) {
+  if (segL)
+    return enviar_datos_SSL(ssl, command, BUFFER_SIZE);
+  return recv(sock, command, BUFFER_SIZE, 0);
 }
 long getNumeroClientes() { return ncliente; }
