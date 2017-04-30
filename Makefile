@@ -66,11 +66,11 @@ $(OBJ)xchat2.o: $(SRC)$(GROUP)xchat2.c
 		@$(CC) $(CCLAGS) $(FLAGSC) -c -o $@ $^
 		@echo "Ejecutable cliente_IRC creado"
 
-$(ECHO)cliente_echo: $(SRC)clienteEcho.c $(LIB)lib.a
+$(ECHO)cliente_echo: $(SRC)$(GROUP)clienteEcho.c $(LIB)lib.a
 	@$(CC) $(CCLAGS) -o $@ $^ $(CCLIBS)
 	@echo "Ejecutable cliente_Echo creado"
 
-$(ECHO)servidor_echo: $(SRC)servidorEcho.c $(LIB)lib.a
+$(ECHO)servidor_echo: $(SRC)$(GROUP)servidorEcho.c $(LIB)lib.a
 	@$(CC) $(CCLAGS) -o $@ $^ $(CCLIBS)
 	@echo "Ejecutable servidor_Echo creado"
 

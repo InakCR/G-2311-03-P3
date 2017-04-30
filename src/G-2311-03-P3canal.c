@@ -14,19 +14,19 @@ void join(char *string, int sock, char *userNick) {
 
     if (IRCMsg_ErrNeedMoreParams(&command, userNick, userNick, string) ==
         IRC_OK) {
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       return;
     }
   } else if (parser == IRC_OK) {
     if (IRCTADChan_TestPassword(channel, key) == IRCERR_FAIL) {
       IRCMsg_ErrBadChannelKey(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       return;
     }
     if (IRCTAD_Join(channel, userNick, "o", key) == IRC_OK) {
 
       if (IRCMsg_Join(&command, userNick, NULL, NULL, channel) == IRC_OK) {
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
 
       IRCTAD_GetTopic(channel, &topic);
@@ -34,11 +34,11 @@ void join(char *string, int sock, char *userNick) {
       if (topic != NULL) {
         if (IRCMsg_RplTopic(&command, prefixS, userNick, channel, topic) ==
             IRC_OK) {
-          send(sock, command, strlen(command), 0);
+          enviarDatos(sock, command);
         }
       } else {
         if (IRCMsg_RplNoTopic(&command, prefixS, userNick, channel) == IRC_OK) {
-          send(sock, command, strlen(command), 0);
+          enviarDatos(sock, command);
         }
       }
 
@@ -61,13 +61,13 @@ void join(char *string, int sock, char *userNick) {
             IRC_OK) {
           for (i = 0; i < nUsers; i++) {
             socket = getsocket(listArray[i]);
-            send(socket, command, strlen(command), 0);
+            enviarDatos(socket, command);
           }
         }
       }
       if (IRCMsg_RplEndOfNames(&command, prefixS, userNick, channel) ==
           IRC_OK) {
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
       free(command);
     }
@@ -90,12 +90,12 @@ void names(char *string, int sock, char *userNick) {
     if (IRCTAD_ListNicksOnChannel(channel, &list, &num) == IRC_OK) {
       if (num > 0) {
         IRCMsg_RplNamReply(&command, prefixS, userNick, "=", channel, list);
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
         syslog(LOG_INFO, "%s", command);
       }
     }
     IRCMsg_RplEndOfNames(&command, prefixS, userNick, channel);
-    send(sock, command, strlen(command), 0);
+    enviarDatos(sock, command);
   }
 }
 
@@ -109,29 +109,29 @@ void part(char *string, int sock, char *userNick) {
     if (parser == IRC_OK) {
 
       IRCMsg_Part(&command, userNick, channel, msg);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
 
       if (IRCTAD_ListNicksOnChannelArray(channel, &list, &nUsers) == IRC_OK) {
         for (i = 0; i < nUsers; i++) {
           socket = getsocket(list[i]);
-          send(socket, command, strlen(command), 0);
+          enviarDatos(socket, command);
         }
       }
     }
     // No existe el usuario en el canal
     else if (parser == IRCERR_NOVALIDUSER) {
       IRCMsg_ErrNotOnChannel(&command, prefixS, userNick, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
     // No existe el canal indicado
     else if (parser == IRCERR_NOVALIDCHANNEL) {
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
     // No se puede eliminar el canal porque es permanente
     else if (parser == IRCERR_UNDELETABLECHANNEL) {
       IRCMsg_ErrNoChanModes(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
   }
 }
@@ -148,7 +148,7 @@ void kick(char *string, int sock, char *userNick) {
 
     if (mode < IRCUMODE_OPERATOR) { //== (IRCUMODE_CREATOR | IRCUMODE_OPERATOR
       IRCMsg_ErrChanOPrivsNeeded(&command, userNick, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       syslog(LOG_INFO, "%s", command);
       return;
     }
@@ -158,29 +158,29 @@ void kick(char *string, int sock, char *userNick) {
 
       parser = IRCMsg_Kick(&command, userNick, channel, user, msg);
       socket = getsocket(user);
-      send(socket, command, strlen(command), 0);
+      enviarDatos(socket, command);
 
       IRCMsg_Part(&command, user, channel, msg);
       IRCTAD_ListNicksOnChannelArray(channel, &list, &nUsers);
       for (i = 0; i < nUsers; i++) {
         socket = getsocket(list[i]); /// &
-        send(socket, command, strlen(command), 0);
+        enviarDatos(socket, command);
       }
 
       // No existe el usuario en el canal
     } else if (parser == IRCERR_NOVALIDUSER) {
       IRCMsg_ErrNotOnChannel(&command, prefixS, userNick, user, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
     // No existe el canal indicado
     else if (parser == IRCERR_NOVALIDCHANNEL) {
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
     // No se puede eliminar el canal porque es permanente
     else if (parser == IRCERR_UNDELETABLECHANNEL) {
       IRCMsg_ErrNoChanModes(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
   }
 }
@@ -197,7 +197,7 @@ void topic(char *string, int sock, char *userNick) {
     if (IRCTAD_SetTopic(channel, userNick, topic) !=
         IRC_OK) { // Comprueba internamente si puede le usuario
       IRCMsg_ErrChanOPrivsNeeded(&command, prefixS, userNick, channel);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       syslog(LOG_ERR, "Error SetTopic");
       return;
     }
@@ -205,7 +205,7 @@ void topic(char *string, int sock, char *userNick) {
       if (IRCTAD_ListNicksOnChannelArray(channel, &list, &nUsers) == IRC_OK) {
         for (i = 0; i < nUsers; i++) {
           socket = getsocket(list[i]);
-          send(socket, command, strlen(command), 0);
+          enviarDatos(socket, command);
         }
       }
     }
@@ -218,11 +218,11 @@ void topic(char *string, int sock, char *userNick) {
 
       if (IRCMsg_RplTopic(&command, prefixS, userNick, channel, topicActual) ==
           IRC_OK) {
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
     } else {
       if (IRCMsg_RplNoTopic(&command, prefixS, userNick, channel) == IRC_OK) {
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
     }
   }
@@ -239,7 +239,7 @@ void mode(char *string, int sock, char *userNick) {
 
           IRCMsg_RplChannelModeIs(&command, prefixS, userNick, channeluser,
                                   modeChannel);
-          send(sock, command, strlen(command), 0);
+          enviarDatos(sock, command);
           syslog(LOG_INFO, "%s", command);
         }
       }
@@ -247,7 +247,7 @@ void mode(char *string, int sock, char *userNick) {
       IRCTAD_Mode(channeluser, userNick, mode);
 
       IRCMsg_Mode(&command, prefixS, channeluser, mode, NULL);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       syslog(LOG_INFO, "%s", command);
 
     } else {
@@ -257,7 +257,7 @@ void mode(char *string, int sock, char *userNick) {
         IRCTADChan_SetPassword(channeluser, user);
 
         IRCMsg_Mode(&command, userNick, channeluser, mode, user);
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
     }
   }
@@ -271,7 +271,7 @@ void msgCanal(char *channel, char *userNick, char *msg) {
       for (i = 0; i < nUsers; i++) {
         if (strcmp(list[i], userNick) != 0) {
           socket = getsocket(list[i]);
-          send(socket, command, strlen(command), 0);
+          enviarDatos(socket, command);
         }
       }
     }

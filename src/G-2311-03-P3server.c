@@ -172,6 +172,7 @@ void seguridadSSL() {
     puts("Error SSL");
     exit(1);
   }
+
 }
 void aceptarConexionSSL(int client_sock) {
   if (aceptar_canal_seguro_SSL(contex, &ssl, client_sock) == 0)
@@ -179,10 +180,11 @@ void aceptarConexionSSL(int client_sock) {
 
   if (evaluar_post_connectar_SSL(ssl) == 0)
     on_error(LOG_ERR, "Evaluacion SSL Incorrecta");
+    setSSL(ssl);
 }
 int recibirDatos(int sock, char *command) {
   if (segL)
-    return enviar_datos_SSL(ssl, command, BUFFER_SIZE);
+    return recibir_datos_SSL(ssl, command, BUFFER_SIZE);
   return recv(sock, command, BUFFER_SIZE, 0);
 }
 long getNumeroClientes() { return ncliente; }

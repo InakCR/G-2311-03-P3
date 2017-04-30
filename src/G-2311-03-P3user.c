@@ -92,30 +92,30 @@ void user(char *string, int sock, char *userNick) {
   // syslog(LOG_INFO, "%s", serverother);
 
   IRCMsg_RplWelcome(&command, prefixU, userNick, user, realname, modehost);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplYourHost(&command, prefixU, userNick, serverother, "1.0");
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   time(&rawtime);
   IRCMsg_RplCreated(&command, prefixU, userNick, rawtime);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplLuserClient(&command, prefixU, userNick,
                         getNumeroClientesActuales(), 0, 1);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplLuserChannels(&command, prefixU, userNick, getNumeroCanales());
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplMotdStart(&command, prefixU, userNick, prefixU);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplMotd(&command, prefixU, userNick, motdServerUser);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   IRCMsg_RplEndOfMotd(&command, prefixU, userNick);
-  send(sock, command, strlen(command), 0);
+  enviarDatos(sock, command);
 
   free(prefix);
   free(user);
@@ -140,12 +140,12 @@ void whois(char *string, int sock, char *userNick) {
       // 311
       IRCMsg_RplWhoIsUser(&command, prefixU, userNick, maskarray, user, host,
                           real);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       syslog(LOG_INFO, "%s", command);
       // 312
       IRCMsg_RplWhoIsServer(&command, prefixU, userNick, maskarray, prefixU,
                             "No OnE");
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
       syslog(LOG_INFO, "%s", command);
       // // 313
       if (IRCTAD_ListChannelsOfUser(user, maskarray, &listChan, &num) ==
@@ -155,25 +155,25 @@ void whois(char *string, int sock, char *userNick) {
           IRCMsg_RplWhoIsChannels(&command, prefixU, userNick, maskarray,
                                   listChan);
 
-          send(sock, command, strlen(command), 0);
+          enviarDatos(sock, command);
         }
       }
       // 317
       // 301
       if (away != NULL) {
         IRCMsg_RplAway(&command, prefixU, userNick, maskarray, away);
-        send(sock, command, strlen(command), 0);
+        enviarDatos(sock, command);
       }
       // 318
       IRCMsg_RplEndOfWhoIs(&command, prefixU, userNick, maskarray);
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     } else {
       syslog(LOG_INFO, " No existe el nick: %s", maskarray);
       // MENSAJE ERROR
     }
   } else {
     if (IRCMsg_ErrNoNickNameGiven(&command, userNick, userNick) == IRC_OK) {
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
     syslog(LOG_ERR, "Error Parseo Whois");
   }
@@ -192,16 +192,16 @@ void away(char *string, int sock, char *userNick) {
     }
 
     if (IRCMsg_RplNowAway(&command, userNick, userNick) == IRC_OK) {
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
 
     if (IRCMsg_RplAway(&command, userNick, userNick, userNick, reason) ==
         IRC_OK) {
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
   } else {
     if (IRCMsg_RplUnaway(&command, userNick, userNick) == IRC_OK) {
-      send(sock, command, strlen(command), 0);
+      enviarDatos(sock, command);
     }
   }
 }
@@ -220,7 +220,7 @@ void msgUser(char *nick, char *userNick, char *msg) {
   //
   //   IRCMsg_RplUnaway(&command, userNick, userNick);
   //   socket = getsocket(userNick);
-  //   send(socket, command, strlen(command), 0);
+  //   enviarDatos(socket, command);
   // }
 
   reason = isAway(nick);
@@ -228,11 +228,11 @@ void msgUser(char *nick, char *userNick, char *msg) {
   if (reason != NULL) {
     IRCMsg_RplAway(&command, userNick, userNick, nick, reason);
     socket = getsocket(userNick);
-    send(socket, command, strlen(command), 0);
+    enviarDatos(socket, command);
   } else {
     if (IRCMsg_Privmsg(&command, userNick, nick, msg) == IRC_OK) {
       socket = getsocket(nick);
-      send(socket, command, strlen(command), 0);
+      enviarDatos(socket, command);
     }
   }
 }
