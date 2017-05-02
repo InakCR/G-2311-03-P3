@@ -83,4 +83,4 @@ void setNick(char *nick, char **userNick);
 char* isAway(char *nick) ;
 long getNumUsuariosCanal(char *channel);
 int enviarDatos(int sock, char *command);
-int setSSL(int ssl);
+int setSSL(SSL* ssl);

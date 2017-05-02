@@ -23,7 +23,7 @@ FLAGS = `pkg-config --cflags gtk+-3.0 --libs gtk+-3.0`
 FLAGSE = `pkg-config --libs gtk+-3.0`
 FLAGSC = `pkg-config --cflags gtk+-3.0`
 #Ficheros
-EXEC = $(CLI_SER)cliente_IRC $(CLI_SER)servidor_IRC $(ECHO)cliente_echo $(ECHO)servidor_echo
+EXEC = $(CLI_SER)servidor_IRC $(ECHO)cliente_echo $(ECHO)servidor_echo
 SOURCE_FILES =
 
 all: dirs certificados libreria $(EXEC)
