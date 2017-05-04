@@ -23,7 +23,7 @@ FLAGS = `pkg-config --cflags gtk+-3.0 --libs gtk+-3.0`
 FLAGSE = `pkg-config --libs gtk+-3.0`
 FLAGSC = `pkg-config --cflags gtk+-3.0`
 #Ficheros
-EXEC = $(CLI_SER)servidor_IRC $(ECHO)cliente_echo $(ECHO)servidor_echo
+EXEC = $(CLI_SER)cliente_IRC $(CLI_SER)servidor_IRC $(ECHO)cliente_echo $(ECHO)servidor_echo
 SOURCE_FILES =
 
 all: dirs certificados libreria $(EXEC)
@@ -59,12 +59,12 @@ $(OBJ)utilidadesTAD.o: $(SRC)$(GROUP)utilidadesTAD.c
 $(OBJ)lib.o: $(SRCLIB)lib.c
 	@$(CC) $(CCFLAGS) -o $@ -c $^
 
-$(CLI_SER)cliente_IRC: $(OBJ)xchat2.o
-		@$(CC) $^ -o $@ $(CCLIBS) $(FLAGSE) $(CCLAGS)
+$(CLI_SER)cliente_IRC: $(OBJ)xchat2.o $(LIB)lib.a
+	@$(CC) $(CCLAGS) $(CCFLAGS) $^ -o $@ $(CCLIBS) $(FLAGSE)
 
 $(OBJ)xchat2.o: $(SRC)$(GROUP)xchat2.c
-		@$(CC) $(CCLAGS) $(FLAGSC) -c -o $@ $^
-		@echo "Ejecutable cliente_IRC creado"
+	@$(CC) $(CCLAGS) $(CCFLAGS) $(FLAGSC) -c -o $@ $^
+	@echo "Ejecutable cliente_IRC creado"
 
 $(ECHO)cliente_echo: $(SRC)$(GROUP)clienteEcho.c $(LIB)lib.a
 	@$(CC) $(CCLAGS) -o $@ $^ $(CCLIBS)

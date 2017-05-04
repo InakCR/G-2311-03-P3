@@ -1,5 +1,7 @@
 #include "../includes/G-2311-03-P3utilidadesTAD.h"
+
 SSL *chSsl = NULL;
+
 void sendAllUser(char *command) {
   char **nicklist;
   long nelements;
@@ -8,7 +10,7 @@ void sendAllUser(char *command) {
   IRCTADUser_GetNickList(&nicklist, &nelements);
   for (i = 0; i < nelements; i++) {
     socket = getsocket(nicklist[i]);
-    enviarDatos(socket,command);
+    enviarDatos(socket, command);
   }
 }
 int setAway(char *nick, char *reason) {
@@ -116,18 +118,13 @@ void setNick(char *nick, char **userNick) {
 char *isAway(char *nick) {
   char *away = NULL;
   IRCTADUser_GetAway(0, NULL, nick, NULL, &away);
-  syslog(LOG_INFO, "Away es %s", away);
   return away;
 }
 
 int enviarDatos(int sock, char *command) {
-  syslog(LOG_INFO, "Enviar SSL %d",(int)chSsl);
-  if (chSsl)
+  if (chSsl != NULL)
     return enviar_datos_SSL(chSsl, command, strlen(command));
-  return enviarDatos(sock, command);
+
+  return send(sock, command, strlen(command), 0);
 }
-int setSSL(SSL* ssl){
-  chSsl = ssl;
-  syslog(LOG_INFO, "SET SSL %d",(int)chSsl);
-}
-// LIBERAR ESTRUCTURAS
+int setSSL(SSL *ssl) { chSsl = ssl; }

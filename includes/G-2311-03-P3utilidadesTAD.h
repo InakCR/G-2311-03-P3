@@ -1,5 +1,4 @@
 /**
-<<<<<<< HEAD
  * @brief Modulo de funciones axuliares para el manejo de los
  * TADs que gestionan canales y usuarios.
  *
@@ -80,7 +79,36 @@ int getsocket(char *nick);
    @param userNick: Antiguo nick del usuario.
  */
 void setNick(char *nick, char **userNick);
+/**
+@brief isAway.
+
+Descripcion: consulta el mensaje away de un usuario.
+@param nick: Nick del usuario.
+@return char*: mensaje de away.
+*/
 char* isAway(char *nick) ;
+/**
+@brief getNumUsuariosCanal.
+
+Descripcion: consulta el numero de usuarios en un canal.
+@param channel: Nombre del canal.
+@return long: numero de usuarios del canal.
+*/
 long getNumUsuariosCanal(char *channel);
+/**
+@brief enviarDatos.
+
+Descripcion: envia los datos dados al socket dado.
+@param sock: conexion de socket de envio.
+@param command: datos a enviar.
+@return int: menor que 1 en caso de fallo.
+*/
 int enviarDatos(int sock, char *command);
+/**
+@brief setSSL.
+
+Descripcion: Activa la seguridad SSL en los envios.
+@param ssl: canal de conexion seguro con SSL.
+@return int: menor que 1 en caso de fallo.
+*/
 int setSSL(SSL* ssl);

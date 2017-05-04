@@ -42,8 +42,27 @@ Descripcion: Recibe un comman do por parte del cliente y lo realiza ne el servid
 @return int: socket de conexion al cliente si todo fue correcto, EXIT_FAILURE en caso de error.
 */
 int recibir(int sock, char** userNick);
+/**
+@brief seguridadSSL.
+
+Descripcion: Prepara la seguridad SSL usando los certificados.
+*/
 void seguridadSSL();
+/**
+@brief aceptarConexionSSL.
+
+Descripcion: Crea un canal seguro SSL con el socket del cliente.
+@param client_sock: socket del cliente.
+*/
 void aceptarConexionSSL(int client_sock);
+/**
+@brief recibirDatos.
+
+Descripcion: recibe los datos enviados por el socket dado.
+@param sock: conexion de socket.
+@param command: datos recibidos.
+@return int: numero de bytes recibidos.
+*/
 int recibirDatos(int sock, char *command);
 /**
 @brief getNumeroClientes.

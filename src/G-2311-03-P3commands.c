@@ -3,6 +3,7 @@
 char motdServer[50] = "**BIENVENIDO AL SERVIDOR**";
 char prefixC[10] = "REDES2";
 
+// TODO Alarma, Memoria IRC_MFree();
 void ping(char *string, int sock, char *userNick) {
   char *prefix, *server, *server2, *msg, *command;
 
@@ -18,102 +19,150 @@ void ping(char *string, int sock, char *userNick) {
 }
 
 void list(char *string, int sock, char *userNick) {
+
   char *prefix, *channel, *command, *topic, **list, *target, numc[10] = "%ld";
-  int i;
+  int i, tadret;
   long num;
 
   if (IRCParse_List(string, &prefix, &channel, &target) == IRC_OK) {
+
     // Miramos que haya canales
     if (getNumeroCanales() > 0) {
+
       // Si nos epecifican el canal O MASCARA  search_string
       if (channel != NULL) {
-        IRCTAD_GetTopic(channel, &topic);
-        if (topic != NULL) {
-          num = getNumUsuariosCanal(channel);
-          sprintf(numc, numc, num);
-          if (IRCTADChan_GetModeInt(channel) < 127) {
-            IRCMsg_RplList(&command, prefixC, userNick, channel, numc, topic);
-            enviarDatos(sock, command);
+
+        tadret = IRCTAD_GetTopic(channel, &topic);
+
+        if (tadret == IRCERR_INVALIDCHANNELNAME) {
+
+          IRCMsg_ErrNoSuchChannel(&command, prefixC, userNick, channel);
+          enviarDatos(sock, command);
+
+          // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
+
+        } else if (tadret == IRCERR_NOENOUGHMEMORY) {
+
+          IRCMsg_ErrChannelIsFull(&command, prefixC, userNick, channel);
+          enviarDatos(sock, command);
+
+          // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
+
+        } else {
+
+          if (topic != NULL) {
+
+            num = getNumUsuariosCanal(channel);
+            sprintf(numc, numc, num);
+
+            if (IRCTADChan_GetModeInt(channel) < 127) {
+              IRCMsg_RplList(&command, prefixC, userNick, channel, numc, topic);
+              enviarDatos(sock, command);
+            }
+
+            // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
           }
+
+          // IRC_MFree(4, &prefix, &channel, &target, &topic);
         }
-        free(channel);
+
       } else {
+
         list = getListaCanales();
+
         for (i = 0; i < getNumeroCanales(); i++) {
+
+          // No error
           IRCTAD_GetTopic(list[i], &topic);
+
           num = getNumUsuariosCanal(list[i]);
           sprintf(numc, numc, num);
+
           if (IRCTADChan_GetModeInt(list[i]) < 127) {
             IRCMsg_RplList(&command, prefixC, userNick, list[i], numc, topic);
             enviarDatos(sock, command);
           }
         }
+
+        // IRC_MFree(5, &prefix, &channel, &target, &topic, &command, &list);
       }
 
       IRCMsg_RplListEnd(&command, prefixC, userNick);
       enviarDatos(sock, command);
+
     } else {
+
       syslog(LOG_INFO, "No hay canales");
+
+      // IRC_MFree(3, &prefix, &channel, &target);
     }
+
   } else {
-    syslog(LOG_ERR, "Error de parseo");
+
+    syslog(LOG_ERR, "***Fallo en el Parseo. List");
+
+    // IRC_MFree(3, &prefix, &channel, &target);
   }
-  free(prefix);
-  free(command);
-  free(target);
 }
 
 void who(char *string, int sock, char *userNick) {
+
   char *prefix, *mask, *oppar, *command, *list;
-  long num = 0;
+  long num = 0, tadret;
 
   if (IRCParse_Who(string, &prefix, &mask, &oppar) == IRC_OK) {
+
     if (mask != NULL) {
-      if (IRCTAD_ListNicksOnChannel(mask, &list, &num) == IRC_OK) {
+
+      tadret = IRCTAD_ListNicksOnChannel(mask, &list, &num);
+
+      if (tadret == IRC_OK) {
+
         if (num > 0) {
+
           IRCMsg_RplWhoIsChannels(&command, prefixC, userNick, mask, list);
           enviarDatos(sock, command);
           syslog(LOG_INFO, "%s", command);
+
+          IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
         }
+
+        IRC_MFree(4, &prefix, &mask, &oppar, &list);
+
+      } else if (tadret == IRCERR_NOENOUGHMEMORY) {
+
+        IRCMsg_ErrChannelIsFull(&command, prefixC, userNick, mask);
+        enviarDatos(sock, command);
+
+        IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
+
+      } else if (tadret == IRCERR_NOVALIDCHANNEL) {
+
+        IRCMsg_ErrNoSuchChannel(&command, prefixC, userNick, mask);
+        enviarDatos(sock, command);
+
+        IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
       }
     }
+
+  } else {
+
+    syslog(LOG_ERR, "***Fallo en el Parseo. Who");
+
+    IRC_MFree(3, &prefix, &mask, &oppar);
   }
 }
 
 void quit(char *string, int sock, char *userNick) {
-  char *reason, *prefix, **arraylist, **arraylistNicks, *command;
-  long num, numNicks;
-  int i, j, socket;
+  char *reason, *prefix, *command;
 
   if (IRCParse_Quit(string, &prefix, &reason) != IRC_OK) {
     syslog(LOG_ERR, "Error Quit");
     return;
   }
 
-  if (IRCTAD_ListChannelsOfUserArray(NULL, userNick, &arraylist, &num) !=
-      IRC_OK) {
-    syslog(LOG_ERR, "Error ListChanUser");
-    return;
-  }
-
   IRCTAD_Quit(userNick);
-  // if (reason != NULL && num > 0) {
-  //   for (i = 0; i < num; i++) {
-  //
-  //     if (IRCTAD_ListNicksOnChannelArray(arraylist[i], &arraylistNicks,
-  //                                        &numNicks) == IRC_OK) {
-  //
-  //       if (IRCMsg_Quit(&command, userNick, reason) == IRC_OK) {
-  //
-  //         for (j = 0; j < numNicks; j++) {
-  //
-  //           socket = getsocket(arraylistNicks[i]);
-  //           enviarDatos(socket, command);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+
   if (IRCMsg_Kill(&command, prefix, userNick, "Desconectado") == IRC_OK) {
     enviarDatos(sock, command);
   }
@@ -121,11 +170,14 @@ void quit(char *string, int sock, char *userNick) {
 }
 
 void motd(char *string, int sock, char *userNick) {
+
   char *prefix, *target, *command;
 
   if (IRCParse_Motd(string, &prefix, &target) != IRC_OK) {
-    syslog(LOG_ERR, "Error Motd");
-    return;
+
+    syslog(LOG_ERR, "***Fallo en el Parseo. Motd");
+
+    IRC_MFree(2, &prefix, &target);
   }
 
   if (IRCMsg_RplMotdStart(&command, prefixC, userNick, prefixC) == IRC_OK) {
@@ -135,39 +187,65 @@ void motd(char *string, int sock, char *userNick) {
   if (IRCMsg_RplMotd(&command, prefixC, userNick, motdServer) == IRC_OK) {
     enviarDatos(sock, command);
   }
+
   if (IRCMsg_RplEndOfMotd(&command, prefixC, userNick) == IRC_OK) {
     enviarDatos(sock, command);
   }
+
+  IRC_MFree(3, &prefix, &target, &command);
 }
 
 void msg(char *string, int sock, char *userNick) {
+
   char *nickorchannel, *prefix, *msg, *command;
 
   if (IRCParse_Privmsg(string, &prefix, &nickorchannel, &msg) == IRC_OK) {
+
     if (IRCTADUser_Test(0, NULL, nickorchannel) == IRC_OK) {
+
       msgUser(nickorchannel, userNick, msg);
+
     } else if (IRCTAD_TestChannelOfUser(nickorchannel, userNick) == IRC_OK) {
+
       msgCanal(nickorchannel, userNick, msg);
+
     } else {
+
       if (IRCMsg_ErrNoSuchNick(&command, prefixC, userNick, nickorchannel) ==
           IRC_OK) {
         enviarDatos(sock, command);
       }
+
+      IRC_MFree(4, &prefix, &nickorchannel, &msg, &command);
     }
+
+  } else {
+
+    syslog(LOG_ERR, "***Fallo en el Parseo. Msg");
+
+    IRC_MFree(3, &prefix, &nickorchannel, &msg);
   }
-  free(nickorchannel);
-  free(msg);
 }
+
 void nocommand(char *string, int sock, char *userNick) {
+
   char *command;
+
   if (IRCMsg_ErrUnKnownCommand(&command, prefixC, userNick, string) == IRC_OK) {
+
     enviarDatos(sock, command);
     syslog(LOG_INFO, "%s", command);
+
+    IRC_MFree(1, &command);
   }
+
   if (IRCMsg_RplTryAgain(&command, prefixC, userNick,
                          "Comando no reconocido") == IRC_OK) {
+
     enviarDatos(sock, command);
     syslog(LOG_INFO, "%s", command);
+
+    IRC_MFree(1, &command);
   }
 }
 
@@ -247,9 +325,4 @@ void doCommand(char *string, int sock, char **userNick) {
     nocommand(string, sock, *userNick);
     break;
   }
-}
-void setMotd(char *motd) {
-  // motdServer = (char *)malloc(strlen(motd + 1) * sizeof(char));
-  // strcpy(motdServer, motd);
-  // setMotdUser(motd);
 }

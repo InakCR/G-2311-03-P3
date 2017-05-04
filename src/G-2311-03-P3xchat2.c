@@ -1,4 +1,7 @@
+#include "../includes/lib.h"
 #include <arpa/inet.h>
+#include <getopt.h>
+#include <inttypes.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -15,10 +18,14 @@
 #define LOG_NUM 2000
 #define T_AL 20
 #define MAX_DS 100
+#define PORT 6669
+
+char cert[200] = "./certs/cliente.pem";
+char certRoot[200] = "./certs/ca.pem";
 
 char id[LOG_NUM] = "";
 char *nickC, *userC, *realnameC, *passwordC, *serverC;
-int sock, portC;
+int sock, portC = 0;
 boolean sslC;
 int numero = 14606209;
 /**
@@ -1252,7 +1259,91 @@ void IRCInterface_TakeOp(char *channel, char *nick) {}
 */
 
 void IRCInterface_TakeVoice(char *channel, char *nick) {}
+int conexion(char *data) {
+  struct hostent *he;
+  struct sockaddr_in serverdir;
+  struct sockaddr_in serveraux;
+  pthread_t pthread;
+  pthread_attr_t attr;
+  char *ip, *command, buffer[MAX_DS], client_msg[LOG_NUM];
+  int *nsocket, numbytes, err;
+  if (portC == 0) {
+    portC = PORT;
+  }
+  if ((he = gethostbyname("localhost")) == NULL)
+    return IRCERR_NOCONNECT;
 
+  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    return IRCERR_NOCONNECT;
+
+  serverdir.sin_family = AF_INET;
+  serverdir.sin_port = htons(portC);
+  serverdir.sin_addr = *((struct in_addr *)he->h_addr);
+
+  bzero(&(serverdir.sin_zero), 8);
+
+  if (connect(sock, (struct sockaddr *)&serverdir, sizeof(struct sockaddr)) ==
+      -1)
+    return IRCERR_NOCONNECT;
+
+  printf("Enviamos Data\n");
+  return send(sock, data, strlen(data), 0);
+}
+int conexionSegura(char *data) {
+  struct sockaddr_in server;
+  SSL_CTX *contex;
+  SSL *ssl;
+  int sock;
+  char user[512];
+
+  if (portC == 0) {
+    portC = PORT;
+  }
+  syslog(LOG_INFO, "Puerto %d\n", portC);
+  inicializar_nivel_SSL();
+  if (fijar_contexto_SSL(&contex, cert, certRoot) == -1) {
+    puts("Error SSL");
+    return -1;
+  }
+  // Create socket
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock == -1) {
+    printf("Could not create socket");
+  }
+  syslog(LOG_INFO, "Soket");
+  server.sin_addr.s_addr = inet_addr("127.0.0.1");
+  server.sin_family = AF_INET;
+  server.sin_port = htons(portC);
+
+  syslog(LOG_INFO, "connect");
+  // Connect to remote server
+  if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
+    perror("connect failed. Error");
+    return 1;
+  }
+  syslog(LOG_INFO, "Connect");
+  if (conectar_canal_seguro_SSL(contex, &ssl, sock) < 1) {
+    perror("Error conectar SSL");
+    return 1;
+  }
+  if (evaluar_post_connectar_SSL(ssl) == 0) {
+    perror("Evaluacion SSL Incorrecta");
+    return 1;
+  }
+  syslog(LOG_INFO, "Enviamos Data %s\n", data);
+  if (enviar_datos_SSL(ssl, data, strlen(data)) < 0) {
+    syslog(LOG_ERR, "Send SSL failed");
+    return 1;
+  }
+  // bzero(user, 512);
+  // strcpy(user, "USER yoda 0 * :miservidor.com");
+  if (enviar_datos_SSL(ssl, "USER yoda 0 * :miservidor.com", 512) < 0) {
+    syslog(LOG_ERR, "Send SSL failed");
+    return 1;
+  }
+  cerrar_canal_SSL(contex, ssl, sock);
+  return 1;
+}
 /***************************************************************************************************/
 /***************************************************************************************************/
 /** **/
@@ -1293,6 +1384,73 @@ int main(int argc, char *argv[]) {
   /* del main y es la que activa el interfaz gráfico quedándose */
   /* en esta función hasta que se pulsa alguna salida del       */
   /* interfaz gráfico.                                          */
+  static struct option long_options[] = {
+      {"ssl", no_argument, NULL, 's'},
+      {"port", required_argument, NULL, 'p'},
+      {"ssldata", required_argument, NULL, 'l'},
+      {"data", required_argument, NULL, 'd'},
+      {NULL, 0, NULL, 0}};
+  char ch;
+  int conex = 0;
+  char data[512];
+  int i;
+  int index = 2;
+  bzero(data, 512);
+
+  while ((ch = getopt_long(argc, argv, "s:p:l:d", long_options, &index)) !=
+         -1) {
+    switch (ch) {
+    case 'd':
+      conex = 1;
+      for (i = 0; i < argc; i++) {
+        if (strcmp("--data", argv[i]) == 0) {
+          i++;
+          break;
+        }
+      }
+      for (i; i < argc; i++) {
+        strcat(data, argv[i]);
+        strcat(data, " ");
+        syslog(LOG_INFO, " %s\n", argv[i]);
+      }
+      syslog(LOG_INFO, "Conexion %s\n", data);
+      break;
+    case 'l':
+
+      conex = 2;
+      for (i = 0; i < argc; i++) {
+        if (strcmp("--ssldata", argv[i]) == 0) {
+          i++;
+          break;
+        }
+      }
+      for (i; i < argc; i++) {
+        strcat(data, argv[i]);
+        strcat(data, " ");
+        syslog(LOG_INFO, " %s\n", argv[i]);
+      }
+      syslog(LOG_INFO, "Conexion Segura %s\n", data);
+      break;
+    case 's':
+      sslC = TRUE;
+      printf("Seguridad SSL activada \n");
+      break;
+    case 'p':
+      portC = atoi(optarg);
+      syslog(LOG_INFO, "Puerto %d\n", portC);
+      printf("Escuchando puerto %d\n", portC);
+      break;
+    case '?':
+      printf("Argumento no reconocido\n");
+      break;
+    }
+  }
+  if (conex == 1) {
+    return conexion(data);
+  } else if (conex == 2) {
+    return conexionSegura(data);
+  }
+
   IRCInterface_Run(argc, argv);
 
   return 0;
