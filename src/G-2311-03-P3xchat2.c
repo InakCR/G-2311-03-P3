@@ -66,7 +66,7 @@ void alarma_ping() {
   numero++;
 
   IRCMsg_Ping(&command, NULL, idPing, NULL);
-  // //enviarDatos(sock, command);
+  // //enviar_datos(sock, command);
 
   // Escribimos en el registro plano
   IRCInterface_PlaneRegisterOutMessage(command);
@@ -509,20 +509,20 @@ long IRCInterface_Connect(char *nick, char *user, char *realname,
   ip = inet_ntoa(serverdir.sin_addr);
 
   printf("Enviamos CAP LS\n");
-  // enviarDatos(sock, "CAP LS\r\n", strlen("CAP LS\r\n"), 0);
+  // enviar_datos(sock, "CAP LS\r\n", strlen("CAP LS\r\n"), 0);
 
   printf("Enviamos Msg_Nick\n");
   if (IRCMsg_Nick(&command, NULL, nick, NULL) != IRC_OK)
     return IRCERR_NOCONNECT;
-  // enviarDatos(sock, command);
+  // enviar_datos(sock, command);
 
   printf("Enviamos Msg_User\n");
   if (IRCMsg_User(&command, NULL, user, "w", realname) != IRC_OK)
     return IRCERR_NOCONNECT;
-  // enviarDatos(sock, command);
+  // enviar_datos(sock, command);
 
   printf("Enviamos CAP END\n");
-  // enviarDatos(sock, "CAP END\r\n", strlen("CAP END\r\n"), 0);
+  // enviar_datos(sock, "CAP END\r\n", strlen("CAP END\r\n"), 0);
   return IRC_OK;
 }
 
@@ -837,7 +837,7 @@ boolean IRCInterface_DisconnectServer(char *server, int port) {
     return FALSE;
 
   IRCInterface_PlaneRegisterOutMessage(command);
-  // enviarDatos(sock, command);
+  // enviar_datos(sock, command);
 
   IRCInterface_WriteSystem("*", "Desconectado ().");
   IRCInterface_RemoveAllChannels();

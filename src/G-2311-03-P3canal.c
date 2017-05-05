@@ -14,7 +14,7 @@ void join(char *string, int sock, char *userNick) {
 
     if (IRCMsg_ErrNeedMoreParams(&command, userNick, userNick, string) ==
         IRC_OK) {
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
       return;
     }
 
@@ -22,7 +22,7 @@ void join(char *string, int sock, char *userNick) {
 
     if (IRCTADChan_TestPassword(channel, key) == IRCERR_FAIL) {
       IRCMsg_ErrBadChannelKey(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
       return;
     }
 
@@ -31,7 +31,7 @@ void join(char *string, int sock, char *userNick) {
     if (tadret == IRC_OK) {
 
       if (IRCMsg_Join(&command, userNick, NULL, NULL, channel) == IRC_OK) {
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
       }
 
       IRCTAD_GetTopic(channel, &topic);
@@ -39,11 +39,11 @@ void join(char *string, int sock, char *userNick) {
       if (topic != NULL) {
         if (IRCMsg_RplTopic(&command, prefixS, userNick, channel, topic) ==
             IRC_OK) {
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
         }
       } else {
         if (IRCMsg_RplNoTopic(&command, prefixS, userNick, channel) == IRC_OK) {
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
         }
       }
 
@@ -66,14 +66,14 @@ void join(char *string, int sock, char *userNick) {
             IRC_OK) {
           for (i = 0; i < nUsers; i++) {
             socket = getsocket(listArray[i]);
-            enviarDatos(socket, command);
+            enviar_datos(socket, command);
           }
         }
       }
 
       if (IRCMsg_RplEndOfNames(&command, prefixS, userNick, channel) ==
           IRC_OK) {
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
       }
 
       IRC_MFree(7, &prefix, &channel, &key, &msg, &command, &list, &listArray);
@@ -81,56 +81,56 @@ void join(char *string, int sock, char *userNick) {
     } else if (tadret == IRCERR_NOVALIDUSER) {
 
       IRCMsg_ErrNoNickNameGiven(&command, prefixS, userNick);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_NOVALIDCHANNEL) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_USERSLIMITEXCEEDED) {
 
       IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
       IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_BANEDUSERONCHANNEL) {
 
       IRCMsg_ErrBannedFromChan(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_NOINVITEDUSER) {
 
       IRCMsg_ErrInviteOnlyChan(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_YETINCHANNEL) {
 
       IRCMsg_ErrUserOnChannel(&command, prefixS, userNick, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
     } else if (tadret == IRCERR_INVALIDCHANNELNAME) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
 
@@ -138,7 +138,7 @@ void join(char *string, int sock, char *userNick) {
 
       IRCMsg_ErrUserNotInChannel(&command, prefixS, userNick, userNick,
                                  channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &key, &msg, &command);
     }
@@ -163,23 +163,23 @@ void names(char *string, int sock, char *userNick) {
 
       if (num > 0) {
         IRCMsg_RplNamReply(&command, prefixS, userNick, "=", channel, list);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
         syslog(LOG_INFO, "%s", command);
         IRC_MFree(1, &list);
       }
     } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
       IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
     } else if (tadret == IRCERR_NOVALIDCHANNEL) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
     }
 
     IRCMsg_RplEndOfNames(&command, prefixS, userNick, channel);
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
 
     IRC_MFree(3, &prefix, &channel, &command);
     if (target != NULL)
@@ -207,12 +207,12 @@ void part(char *string, int sock, char *userNick) {
     if (parser == IRC_OK) {
 
       IRCMsg_Part(&command, userNick, channel, msg);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       if (IRCTAD_ListNicksOnChannelArray(channel, &list, &nUsers) == IRC_OK) {
         for (i = 0; i < nUsers; i++) {
           socket = getsocket(list[i]);
-          enviarDatos(socket, command);
+          enviar_datos(socket, command);
         }
         if (list != NULL)
           IRC_MFree(1, &list);
@@ -224,7 +224,7 @@ void part(char *string, int sock, char *userNick) {
     else if (parser == IRCERR_NOVALIDUSER) {
 
       IRCMsg_ErrNotOnChannel(&command, prefixS, userNick, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &msg, &command);
 
@@ -233,7 +233,7 @@ void part(char *string, int sock, char *userNick) {
     else if (parser == IRCERR_NOVALIDCHANNEL) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &msg, &command);
 
@@ -242,7 +242,7 @@ void part(char *string, int sock, char *userNick) {
     else if (parser == IRCERR_UNDELETABLECHANNEL) {
 
       IRCMsg_ErrNoChanModes(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &msg, &command);
     }
@@ -267,7 +267,7 @@ void kick(char *string, int sock, char *userNick) {
 
     if (mode < IRCUMODE_OPERATOR) { //== (IRCUMODE_CREATOR | IRCUMODE_OPERATOR
       IRCMsg_ErrChanOPrivsNeeded(&command, userNick, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
       syslog(LOG_INFO, "%s", command);
       return;
     }
@@ -278,14 +278,14 @@ void kick(char *string, int sock, char *userNick) {
 
       parser = IRCMsg_Kick(&command, userNick, channel, user, msg);
       socket = getsocket(user);
-      enviarDatos(socket, command);
+      enviar_datos(socket, command);
 
       IRCMsg_Part(&command, user, channel, msg);
       IRCTAD_ListNicksOnChannelArray(channel, &list, &nUsers);
 
       for (i = 0; i < nUsers; i++) {
         socket = getsocket(list[i]); /// &
-        enviarDatos(socket, command);
+        enviar_datos(socket, command);
       }
 
       IRC_MFree(6, &prefix, &channel, &user, &msg, &command, &list);
@@ -294,7 +294,7 @@ void kick(char *string, int sock, char *userNick) {
     } else if (parser == IRCERR_NOVALIDUSER) {
 
       IRCMsg_ErrNotOnChannel(&command, prefixS, userNick, user, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &user, &msg, &command);
 
@@ -303,7 +303,7 @@ void kick(char *string, int sock, char *userNick) {
     else if (parser == IRCERR_NOVALIDCHANNEL) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &user, &msg, &command);
 
@@ -312,7 +312,7 @@ void kick(char *string, int sock, char *userNick) {
     else if (parser == IRCERR_UNDELETABLECHANNEL) {
 
       IRCMsg_ErrNoChanModes(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(5, &prefix, &channel, &user, &msg, &command);
     }
@@ -344,7 +344,7 @@ void topic(char *string, int sock, char *userNick) {
     if (IRCTAD_SetTopic(channel, userNick, topic) != IRC_OK) {
 
       IRCMsg_ErrChanOPrivsNeeded(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &topic, &command);
 
@@ -360,7 +360,7 @@ void topic(char *string, int sock, char *userNick) {
 
         for (i = 0; i < nUsers; i++) {
           socket = getsocket(list[i]);
-          enviarDatos(socket, command);
+          enviar_datos(socket, command);
         }
 
         IRC_MFree(5, &prefix, &channel, &topic, &command, &list);
@@ -368,14 +368,14 @@ void topic(char *string, int sock, char *userNick) {
       } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
         IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
 
         IRC_MFree(5, &prefix, &channel, &topic, &command, &list);
 
       } else if (tadret == IRCERR_NOVALIDCHANNEL) {
 
         IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
 
         IRC_MFree(5, &prefix, &channel, &topic, &command, &list);
       }
@@ -388,14 +388,14 @@ void topic(char *string, int sock, char *userNick) {
     if (tadret == IRCERR_INVALIDCHANNELNAME) {
 
       IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &topicActual, &command);
 
     } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
       IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
       IRC_MFree(4, &prefix, &channel, &topicActual, &command);
 
@@ -406,7 +406,7 @@ void topic(char *string, int sock, char *userNick) {
         if (IRCMsg_RplTopic(&command, prefixS, userNick, channel,
                             topicActual) == IRC_OK) {
 
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
 
           IRC_MFree(4, &prefix, &channel, &topicActual, &command);
         }
@@ -415,7 +415,7 @@ void topic(char *string, int sock, char *userNick) {
 
         if (IRCMsg_RplNoTopic(&command, prefixS, userNick, channel) == IRC_OK) {
 
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
 
           IRC_MFree(4, &prefix, &channel, &topicActual, &command);
         }
@@ -444,7 +444,7 @@ void mode(char *string, int sock, char *userNick) {
 
           IRCMsg_RplChannelModeIs(&command, prefixS, userNick, channeluser,
                                   modeChannel);
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
           syslog(LOG_INFO, "%s", command);
 
           IRC_MFree(5, &prefix, &channeluser, &mode, &user, &command);
@@ -458,7 +458,7 @@ void mode(char *string, int sock, char *userNick) {
       IRCTAD_Mode(channeluser, userNick, mode);
 
       IRCMsg_Mode(&command, prefixS, channeluser, mode, NULL);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
       syslog(LOG_INFO, "%s", command);
 
       IRC_MFree(5, &prefix, &channeluser, &mode, &user, &command);
@@ -472,7 +472,7 @@ void mode(char *string, int sock, char *userNick) {
         IRCTADChan_SetPassword(channeluser, user);
 
         IRCMsg_Mode(&command, userNick, channeluser, mode, user);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
 
         IRC_MFree(5, &prefix, &channeluser, &mode, &user, &command);
       }
@@ -482,7 +482,7 @@ void mode(char *string, int sock, char *userNick) {
   }
 }
 
-void msgCanal(char *channel, char *userNick, char *msg) {
+void msg_canal(char *channel, char *userNick, char *msg) {
 
   char *command, **list;
   int i, socket, sock;
@@ -502,19 +502,19 @@ void msgCanal(char *channel, char *userNick, char *msg) {
 
         if (strcmp(list[i], userNick) != 0) {
           socket = getsocket(list[i]);
-          enviarDatos(socket, command);
+          enviar_datos(socket, command);
         }
       }
 
     } else if (tadret == IRCERR_NOTARGET) {
 
       IRCMsg_ErrCanNotSendToChan(&command, prefixS, userNick, channel);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
     } else if (tadret == IRCERR_NOMESSAGE) {
 
       IRCMsg_ErrNoTextToSend(&command, prefixS, userNick);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
     }
 
     IRC_MFree(2, &command, &list);
@@ -522,14 +522,14 @@ void msgCanal(char *channel, char *userNick, char *msg) {
   } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
     IRCMsg_ErrChannelIsFull(&command, prefixS, userNick, channel);
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
 
     IRC_MFree(2, &command, &list);
 
   } else if (tadret == IRCERR_NOVALIDCHANNEL) {
 
     IRCMsg_ErrNoSuchChannel(&command, prefixS, userNick, channel);
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
 
     IRC_MFree(2, &command, &list);
   }

@@ -9,7 +9,7 @@ void ping(char *string, int sock, char *userNick) {
 
   if (IRCParse_Ping(string, &prefix, &server, &server2, &msg) == IRC_OK) {
     if (IRCMsg_Pong(&command, prefixC, prefixC, server2, server) == IRC_OK) {
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
     }
     free(command);
   }
@@ -27,7 +27,7 @@ void list(char *string, int sock, char *userNick) {
   if (IRCParse_List(string, &prefix, &channel, &target) == IRC_OK) {
 
     // Miramos que haya canales
-    if (getNumeroCanales() > 0) {
+    if (get_numero_canales() > 0) {
 
       // Si nos epecifican el canal O MASCARA  search_string
       if (channel != NULL) {
@@ -37,14 +37,14 @@ void list(char *string, int sock, char *userNick) {
         if (tadret == IRCERR_INVALIDCHANNELNAME) {
 
           IRCMsg_ErrNoSuchChannel(&command, prefixC, userNick, channel);
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
 
           // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
 
         } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
           IRCMsg_ErrChannelIsFull(&command, prefixC, userNick, channel);
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
 
           // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
 
@@ -52,12 +52,12 @@ void list(char *string, int sock, char *userNick) {
 
           if (topic != NULL) {
 
-            num = getNumUsuariosCanal(channel);
+            num = get_num_usuarios_canal(channel);
             sprintf(numc, numc, num);
 
             if (IRCTADChan_GetModeInt(channel) < 127) {
               IRCMsg_RplList(&command, prefixC, userNick, channel, numc, topic);
-              enviarDatos(sock, command);
+              enviar_datos(sock, command);
             }
 
             // IRC_MFree(5, &prefix, &channel, &target, &topic, &command);
@@ -68,19 +68,19 @@ void list(char *string, int sock, char *userNick) {
 
       } else {
 
-        list = getListaCanales();
+        list = get_lista_canales();
 
-        for (i = 0; i < getNumeroCanales(); i++) {
+        for (i = 0; i < get_numero_canales(); i++) {
 
           // No error
           IRCTAD_GetTopic(list[i], &topic);
 
-          num = getNumUsuariosCanal(list[i]);
+          num = get_num_usuarios_canal(list[i]);
           sprintf(numc, numc, num);
 
           if (IRCTADChan_GetModeInt(list[i]) < 127) {
             IRCMsg_RplList(&command, prefixC, userNick, list[i], numc, topic);
-            enviarDatos(sock, command);
+            enviar_datos(sock, command);
           }
         }
 
@@ -88,7 +88,7 @@ void list(char *string, int sock, char *userNick) {
       }
 
       IRCMsg_RplListEnd(&command, prefixC, userNick);
-      enviarDatos(sock, command);
+      enviar_datos(sock, command);
 
     } else {
 
@@ -121,7 +121,7 @@ void who(char *string, int sock, char *userNick) {
         if (num > 0) {
 
           IRCMsg_RplWhoIsChannels(&command, prefixC, userNick, mask, list);
-          enviarDatos(sock, command);
+          enviar_datos(sock, command);
           syslog(LOG_INFO, "%s", command);
 
           IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
@@ -132,14 +132,14 @@ void who(char *string, int sock, char *userNick) {
       } else if (tadret == IRCERR_NOENOUGHMEMORY) {
 
         IRCMsg_ErrChannelIsFull(&command, prefixC, userNick, mask);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
 
         IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
 
       } else if (tadret == IRCERR_NOVALIDCHANNEL) {
 
         IRCMsg_ErrNoSuchChannel(&command, prefixC, userNick, mask);
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
 
         IRC_MFree(5, &prefix, &mask, &oppar, &list, &command);
       }
@@ -164,7 +164,7 @@ void quit(char *string, int sock, char *userNick) {
   IRCTAD_Quit(userNick);
 
   if (IRCMsg_Kill(&command, prefix, userNick, "Desconectado") == IRC_OK) {
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
   }
   close(sock);
 }
@@ -181,15 +181,15 @@ void motd(char *string, int sock, char *userNick) {
   }
 
   if (IRCMsg_RplMotdStart(&command, prefixC, userNick, prefixC) == IRC_OK) {
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
   }
 
   if (IRCMsg_RplMotd(&command, prefixC, userNick, motdServer) == IRC_OK) {
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
   }
 
   if (IRCMsg_RplEndOfMotd(&command, prefixC, userNick) == IRC_OK) {
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
   }
 
   IRC_MFree(3, &prefix, &target, &command);
@@ -203,17 +203,17 @@ void msg(char *string, int sock, char *userNick) {
 
     if (IRCTADUser_Test(0, NULL, nickorchannel) == IRC_OK) {
 
-      msgUser(nickorchannel, userNick, msg);
+      msg_user(nickorchannel, userNick, msg);
 
     } else if (IRCTAD_TestChannelOfUser(nickorchannel, userNick) == IRC_OK) {
 
-      msgCanal(nickorchannel, userNick, msg);
+      msg_canal(nickorchannel, userNick, msg);
 
     } else {
 
       if (IRCMsg_ErrNoSuchNick(&command, prefixC, userNick, nickorchannel) ==
           IRC_OK) {
-        enviarDatos(sock, command);
+        enviar_datos(sock, command);
       }
 
       IRC_MFree(4, &prefix, &nickorchannel, &msg, &command);
@@ -233,7 +233,7 @@ void nocommand(char *string, int sock, char *userNick) {
 
   if (IRCMsg_ErrUnKnownCommand(&command, prefixC, userNick, string) == IRC_OK) {
 
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
     syslog(LOG_INFO, "%s", command);
 
     IRC_MFree(1, &command);
@@ -242,14 +242,14 @@ void nocommand(char *string, int sock, char *userNick) {
   if (IRCMsg_RplTryAgain(&command, prefixC, userNick,
                          "Comando no reconocido") == IRC_OK) {
 
-    enviarDatos(sock, command);
+    enviar_datos(sock, command);
     syslog(LOG_INFO, "%s", command);
 
     IRC_MFree(1, &command);
   }
 }
 
-void doCommand(char *string, int sock, char **userNick) {
+void do_command(char *string, int sock, char **userNick) {
 
   if (string == NULL)
     return;

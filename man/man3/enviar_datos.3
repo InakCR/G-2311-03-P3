@@ -1,0 +1,34 @@
+.TH "enviar_datos" 3 "Fri May 5 2017" "G-2311-03-P3" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+enviar_datos \- () \fB\fP 
+enviar_datos- Realiza el envio de datos
+.SH "SINOPSIS"
+.PP
+\fB#include\fP \fB\fBG-2311-03-P3utilidadesTAD\&.h\fP\fP 
+.br
+\fBint\fP enviar_datos(int sock, char *command); 
+.SH "Descripcion"
+.PP
+envia los datos dados al socket dado por medio de seguridad SSL en caso de que este acativa o realizarlo por un canal no seguro\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIsock\fP conexion de socket de envio\&. 
+.br
+\fIcommand\fP datos a enviar\&. 
+.RE
+.PP
+.SH "RETORNO"
+.PP
+\fBReturns:\fP
+.RS 4
+int: menor que 1 en caso de fallo\&. 
+.RE
+.PP
+.SH "VER TAMBIEN"
+.PP
+.SH "AUTORES"
+.PP
+Iñaki Cadalso innaki.cadalso@estudiante.uam.es, Enrique Aracil enrique.aracil@estudiante.uam.es 

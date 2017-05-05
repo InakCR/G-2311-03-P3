@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     case 's':
       segL = 1;
       printf("Seguridad SSL activada \n");
-      seguridadSSL();
+      seguridad_ssl();
       break;
     case 'p':
       port = atoi(optarg);
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     socketClient = accept_conex(socketServer);
     // Tiempo de espera a una peticion
     if (segL)
-      aceptarConexionSSL(socketClient);
+      aceptar_conexion_ssl(socketClient);
     // hilo conexion cliente, atendemos al cliente en el hilo
     pthread_attr_init(&attr);
     err = pthread_create(&ptCliente[ncliente], &attr, deal_cliente,
@@ -115,7 +115,7 @@ int recibir(int sock, char **userNick) {
   int n_command = 1;
 
   /*Recibimos el comando*/
-  if (recibirDatos(sock, command) < 1) {
+  if (recibir_datos(sock, command) < 1) {
     if (segL)
       cerrar_canal_SSL(contex, ssl, sock);
     else
@@ -131,19 +131,19 @@ int recibir(int sock, char **userNick) {
 
     syslog(LOG_INFO, "Llega Bloque de Comandos:");
     syslog(LOG_INFO, "Comando nº%d", n_command++);
-    doCommand(pipeCommand, sock, userNick);
+    do_command(pipeCommand, sock, userNick);
 
     while ((pipe = IRC_UnPipelineCommands(pipe, &pipeCommand)) != NULL) {
 
       syslog(LOG_INFO, "Comando nº%d", n_command++);
-      doCommand(pipeCommand, sock, userNick);
+      do_command(pipeCommand, sock, userNick);
     }
 
     if (pipe == NULL) {
 
       bzero(command, BUFFER_SIZE);
       syslog(LOG_INFO, "Comando nº%d", n_command++);
-      doCommand(pipeCommand, sock, userNick);
+      do_command(pipeCommand, sock, userNick);
     }
 
   } else {
@@ -154,7 +154,7 @@ int recibir(int sock, char **userNick) {
     } else {
 
       syslog(LOG_INFO, "Comando simple:");
-      doCommand(pipeCommand, sock, userNick);
+      do_command(pipeCommand, sock, userNick);
     }
   }
 
@@ -163,7 +163,7 @@ int recibir(int sock, char **userNick) {
 
   return 1;
 }
-void seguridadSSL() {
+void seguridad_ssl() {
   char cert[200] = "./certs/servidor.pem";
   char certRoot[200] = "./certs/ca.pem";
 
@@ -174,15 +174,15 @@ void seguridadSSL() {
   }
 
 }
-void aceptarConexionSSL(int client_sock) {
+void aceptar_conexion_ssl(int client_sock) {
   if (aceptar_canal_seguro_SSL(contex, &ssl, client_sock) == 0)
     on_error(LOG_ERR, "Error Aceptar SSL");
 
   if (evaluar_post_connectar_SSL(ssl) == 0)
     on_error(LOG_ERR, "Evaluacion SSL Incorrecta");
-    setSSL(ssl);
+    set_ssl(ssl);
 }
-int recibirDatos(int sock, char *command) {
+int recibir_datos(int sock, char *command) {
   if (segL)
     return recibir_datos_SSL(ssl, command, BUFFER_SIZE);
   return recv(sock, command, BUFFER_SIZE, 0);

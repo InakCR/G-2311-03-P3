@@ -1,0 +1,36 @@
+.TH "recibir_datos__s_s_l" 3 "Fri May 5 2017" "G-2311-03-P3" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+recibir_datos__s_s_l \- () \fB\fP 
+recibir_datos_SSL - Recepcion de datos por un canal SSL
+.SH "SINOPSIS"
+.PP
+\fB#include\fP \fB\fBlib\&.h\fP\fP 
+.br
+\fBint\fP recibir_datos_SSL(SSL *ssl, void *buf, int num); 
+.SH "Descripcion"
+.PP
+Esta función será el equivalente a la función de lectura de mensajes que se realizó en la práctica 1, pero será utilizada para enviar datos a través del canal seguro\&. Es importante que sea genérica y pueda ser utilizada independientemente de los datos que se vayan a recibir\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIssl\fP : canal seguro ssl 
+.br
+\fIbuf\fP : mensaje a recibir 
+.br
+\fInum\fP : tamaño en bytes del mensaje 
+.RE
+.PP
+.SH "RETORNO"
+.PP
+\fBReturns:\fP
+.RS 4
+numero de bytes leidos, negativo en caso de fallo 
+.RE
+.PP
+.SH "VER TAMBIEN"
+.PP
+.SH "AUTORES"
+.PP
+Iñaki Cadalso innaki.cadalso@estudiante.uam.es, Enrique Aracil enrique.aracil@estudiante.uam.es 

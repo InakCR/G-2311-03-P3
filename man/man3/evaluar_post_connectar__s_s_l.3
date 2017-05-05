@@ -1,0 +1,32 @@
+.TH "evaluar_post_connectar__s_s_l" 3 "Fri May 5 2017" "G-2311-03-P3" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+evaluar_post_connectar__s_s_l \- () \fB\fP 
+evaluar_post_connectar_SSL - Comprueba la correcta conexion SSL
+.SH "SINOPSIS"
+.PP
+\fB#include\fP \fB\fBlib\&.h\fP\fP 
+.br
+\fBint\fP evaluar_post_connectar_SSL(SSL *ssl); 
+.SH "Descripcion"
+.PP
+Esta función comprobará una vez realizado el handshake que el canal de comunicación se puede considerar seguro\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIssl\fP : canal seguro ssl 
+.RE
+.PP
+.SH "RETORNO"
+.PP
+\fBReturns:\fP
+.RS 4
+-1 en caso de error 
+.RE
+.PP
+.SH "VER TAMBIEN"
+.PP
+.SH "AUTORES"
+.PP
+Iñaki Cadalso innaki.cadalso@estudiante.uam.es, Enrique Aracil enrique.aracil@estudiante.uam.es 

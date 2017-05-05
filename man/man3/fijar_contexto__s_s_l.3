@@ -1,0 +1,36 @@
+.TH "fijar_contexto__s_s_l" 3 "Fri May 5 2017" "G-2311-03-P3" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+fijar_contexto__s_s_l \- () \fB\fP 
+fijar_contexto_SSL - Inicializacion Contexto certificados
+.SH "SINOPSIS"
+.PP
+\fB#include\fP \fB\fBlib\&.h\fP\fP 
+.br
+\fBint\fP fijar_contexto_SSL(SSL_CTX **contex, char *cert, char *certRoot); 
+.SH "Descripcion"
+.PP
+Esta función se encargará de inicializar correctamente el contexto que será utilizado para la creación de canales seguros mediante SSL\&. Deberá recibir información sobre las rutas a los certificados y claves con los que vaya a trabajar la aplicación\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcontex\fP : contexto SSL que se inicializa 
+.br
+\fIcert\fP certificado del cliente/servidor 
+.br
+\fIcertRoot\fP certificado externo 
+.RE
+.PP
+.SH "RETORNO"
+.PP
+\fBReturns:\fP
+.RS 4
+-1 en caso de error 
+.RE
+.PP
+.SH "VER TAMBIEN"
+.PP
+.SH "AUTORES"
+.PP
+Iñaki Cadalso innaki.cadalso@estudiante.uam.es, Enrique Aracil enrique.aracil@estudiante.uam.es 
