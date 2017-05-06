@@ -19,18 +19,17 @@
    \n\b void ping(char *string, int sock, char *userNick)
    @section description Descripcion
    Responde el servidor a una peticion de ping con un pong al
-    cliente
-
-       @param string: Cadena que contiene el comando NICK y su informacion.
-       @param sock: Puerto en el que se encuentra el usuario.
-       @param userNick: nick que usa el usuario conectado en el server.
+   cliente
+   @param string: Cadena que contiene el comando NICK y su informacion.
+   @param sock: Puerto en el que se encuentra el usuario.
+   @param userNick: nick que usa el usuario conectado en el server.
    @section return RETORNO
    Retorno void
    @section seealso VER TAMBIEN
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 
 void ping(char *string, int sock, char *userNick);
 /**
@@ -50,8 +49,8 @@ void ping(char *string, int sock, char *userNick);
    @section seealso VER TAMBIEN
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 
 void quit(char *string, int sock, char *userNick);
 /**
@@ -71,8 +70,8 @@ void quit(char *string, int sock, char *userNick);
    @section seealso VER TAMBIEN
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 void motd(char *string, int sock, char *userNick);
 /**
    @page msg() \b
@@ -92,8 +91,8 @@ void motd(char *string, int sock, char *userNick);
    \b msg_user() msg_canal()
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 void msg(char *string, int sock, char *userNick);
 /**
    @page nocommand() \b
@@ -103,17 +102,17 @@ void msg(char *string, int sock, char *userNick);
    \n\b void nocommand(char *string, int sock, char *userNick)
    @section description Descripcion
    Informa al cliente de que el servidor no ha reconocido el
-    comando.
-    @param string: Cadena que contiene el comando no reconocido y su informacion.
-    @param sock: Puerto en el que se encuentra el usuario.
-    @param userNick: nick que usa el usuario conectado en el server.
+   comando.
+   @param string: Cadena que contiene el comando no reconocido y su informacion.
+   @param sock: Puerto en el que se encuentra el usuario.
+   @param userNick: nick que usa el usuario conectado en el server.
    @section return RETORNO
    Retorno void
    @section seealso VER TAMBIEN
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 
 void nocommand(char *string, int sock, char *userNick);
 /**
@@ -123,15 +122,15 @@ void nocommand(char *string, int sock, char *userNick);
    \b #include \b G-2311-03-P1commands.h
    \n\b void do_command(char *string, int sock, char **userNick);
    @section description Descripcion
-    Identifica el commando correcto del servidor.
-    @param string: Cadena que contiene el comando a identificar.
-    @param sock: Puerto en el que se encuentra el usuario.
+   Identifica el commando correcto del servidor.
+   @param string: Cadena que contiene el comando a identificar.
+   @param sock: Puerto en el que se encuentra el usuario.
    @section return RETORNO
    Retorno void
    @section seealso VER TAMBIEN
    @section authors AUTORES
    Iñaki Cadalso <innaki.cadalso@estudiante.uam.es>,
-   * Enrique Aracil <enrique.aracil@estudiante.uam.es>
-   */
+ * Enrique Aracil <enrique.aracil@estudiante.uam.es>
+ */
 
 void do_command(char *string, int sock, char **userNick);
